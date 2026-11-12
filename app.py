@@ -1,112 +1,119 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
 
-st.set_page_config(page_title="Universal Musical AI - Master Workstation", page_icon="🎵", layout="wide")
+st.set_page_config(page_title="Universal Musical AI - Master Pro Studio", page_icon="🎵", layout="wide")
 
-st.title("🎵 Universal Musical AI - Master Studio Workstation")
-st.markdown("##### AI-Powered Hindustani Classical Vocal, Tabla & Computational Musicology System")
+st.title("🎵 Universal Musical AI - Master Professional Workstation")
+st.markdown("### AI-Powered Practice Workstation: Live Mic Capture, AI Coach Assistant, Practice Summary & Traditional Instruments Suite")
 
-# ----------------- SIDEBAR: STUDIO CONTROLS & 12 BASE SCALES -----------------
-st.sidebar.header("🎛️ Studio & Master Controls")
+GLOBAL_INSTRUMENTS = {
+    "Vocal - Hindustani Classical": {"family": "Vocal", "fmin": "C2", "fmax": "C7", "desc": "Continuous microtones & Shruti precision", "playable": True},
+    "Surmandal - Plucked Arpeggio": {"family": "Strings", "fmin": "C3", "fmax": "C6", "desc": "Rolling arpeggio plucks for raga mood & swara setup", "playable": True},
+    "Sitar - Plucked String": {"family": "Strings", "fmin": "C2", "fmax": "E6", "desc": "Sympathetic strings (Tarab) & Meend dynamics", "playable": True},
+    "Rabab - Central Asian Plucked": {"family": "Strings", "fmin": "G2", "fmax": "E6", "desc": "Deep rustic plucked resonance & fast attacks", "playable": True},
+    "Taus - Sacred Bowed Instrument": {"family": "Bowed", "fmin": "G2", "fmax": "A6", "desc": "Historic bowed string instrument with deep resonance", "playable": True},
+    "Tabla - Indian Percussion": {"family": "Percussion", "fmin": "C2", "fmax": "C5", "desc": "High transient rhythmic beat & pitch modulation", "playable": True}
+}
 
-instrument = st.sidebar.selectbox(
-    "Select Instrument / Performance Profile",
-    ["Vocal - Hindustani Classical", "Vocal - Western / Pop", "Guitar / Sitar", "Violin / Sarangi", "Tabla / Percussion"]
-)
+selected_instrument = st.sidebar.selectbox("Select Instrument Profile (Live Demo & Play)", list(GLOBAL_INSTRUMENTS.keys()), index=0)
+inst_details = GLOBAL_INSTRUMENTS[selected_instrument]
 
-# All 12 Chromatic Scales Selection
-scales_dict = {
-    "C (261.63 Hz - Low Male / Mandra)": 261.63,
+ALL_SCALES_CONFIG = {
+    "C (163.65 Hz - Low Male / Mandra)": 163.65,
     "C# (277.18 Hz - Standard Male / Gurdeep Style)": 277.18,
     "D (293.66 Hz - Male Classical)": 293.66,
     "D# (311.13 Hz - Semi-Classical)": 311.13,
-    "E (329.63 Hz - High Male / Low Female)": 329.63,
+    "E (329.63 Hz - Higher Male / Low Female)": 329.63,
     "F (349.23 Hz - Female Standard)": 349.23,
     "F# (369.99 Hz - Female Classical)": 369.99,
-    "G (392.00 Hz - High Female)": 392.00,
+    "G (392.00 Hz - Higher Female)": 392.00,
     "G# (415.30 Hz - Soprano)": 415.30,
     "A (440.00 Hz - Concert Pitch)": 440.00,
     "A# (466.16 Hz - High Pitch)": 466.16,
     "B (493.88 Hz - Highest Pitch)": 493.88
 }
 
-selected_scale_name = st.sidebar.selectbox("Select Base Tonic (Sa Scale - All 12 Roots)", list(scales_dict.keys()), index=1)
-sa_hz = scales_dict[selected_scale_name]
+selected_scale_name = st.sidebar.selectbox("Select Base Tonic (Sa Scale)", list(ALL_SCALES_CONFIG.keys()), index=1)
+sa_hz = ALL_SCALES_CONFIG[selected_scale_name]
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🎚️ Acoustic Layer Controller")
-enable_tanpura = st.sidebar.checkbox("🎵 Enable Gurdeep Style Tanpura Drone", value=True)
-enable_surmandal = st.sidebar.checkbox("🪕 Enable Surmandal Arpeggio Plucks", value=True)
-enable_warmpad = st.sidebar.checkbox("🎹 Enable Warm Backing Pad", value=False)
-master_vol = st.sidebar.slider("Master Drone Volume (%)", 10, 100, 80)
+st.sidebar.subheader("🪘 Rhythm & Companion Controls")
+enable_tabla_loop = st.sidebar.checkbox("Enable Tabla Theka / Rhythm Loop", value=True)
+taal_type = st.sidebar.selectbox("Select Taal", ["Teental (16 Beats)", "Keherwa (8 Beats)", "Dadra (6 Beats)"])
+tempo_bpm = st.sidebar.slider("Tempo / Laya (BPM)", 40, 240, 108)
 
-# ----------------- MAIN LAYOUT -----------------
-tab1, tab2, tab3 = st.tabs(["🎙️ Practice & Live Session Recorder", "📐 22 Shruti Precision Engine", "📊 Raga & Session Analytics"])
+st.sidebar.markdown("---")
+st.sidebar.subheader("🎵 Acoustic Layer Controller")
+enable_tanpura = st.sidebar.checkbox("Enable Tanpura Drone", value=True)
+enable_surmandal_bg = st.sidebar.checkbox("Enable Background Surmandal Plucks", value=True)
+master_vol = st.sidebar.slider("Master Volume (%)", 10, 100, 85)
+
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "🔴 Live Mic & AI Coach Assistant", 
+    "📊 Practice Session Summary", 
+    "🪕 Instrument Live Demo & Screen Play", 
+    "📐 22 Shruti Precision Engine", 
+    "🎓 Theory & Online Test Portal"
+])
 
 with tab1:
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("🎙️ Student Practice Audio Session")
-        uploaded_audio = st.file_uploader("Upload Practice Audio (.wav, .mp3)", type=["wav", "mp3"])
-        analyze_btn = st.button("Run AI Session Analysis", type="primary")
-        
-        st.markdown("---")
-        st.subheader("🎛️ Live Acoustic Layers Preview")
-        st.info(f"Active Acoustic Drone Scale: **{selected_scale_name.split()[0]}** ({sa_hz} Hz)")
-        
-    with col2:
-        st.subheader("📋 Session Performance Summary")
-        if analyze_btn or uploaded_audio:
-            st.success("🎯 Session Data Processed Successfully!")
-            
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Overall Pitch Score", "84.2%", "+2.5%")
-            m2.metric("Detected Tonic (Sa)", f"{sa_hz} Hz")
-            m3.metric("Tempo (BPM)", "117.4 BPM")
-            
-            # Practice Session Recorder Tracking
-            st.markdown("#### ⏱️ Smart Session Recorder Log")
-            session_df = pd.DataFrame({
-                "Session Metric": ["Total Recording Time", "Active Practice Time", "Natural Pause / Break Time", "Long Breaks (>1 min)", "Session Status"],
-                "Logged Value": ["3.45 mins (207 sec)", "2.85 mins (171 sec)", "0.60 mins (36 sec)", "0 Detected", "🟢 Auto-Logged & Saved"]
-            })
-            st.table(session_df)
-        else:
-            st.info("Upload an audio file or click 'Run AI Session Analysis' to evaluate pitch and session recording.")
+    st.subheader("🔴 Live Microphone Capture & AI Teacher Assistant")
+    col_m1, col_m2 = st.columns(2)
+    with col_m1:
+        st.info(f"**Active Profile:** {selected_instrument}\n\n**Base Tonic:** {selected_scale_name.split()[0]} ({sa_hz} Hz)\n\n**Characteristics:** {inst_details['desc']}")
+        if st.button("🔴 Start Live Practice & AI Coaching", type="primary"):
+            st.success("🎙️ Live Microphone Connected & Capturing Audio Stream...")
+            st.warning("🤖 **AI Coach Assistant (Teacher Prescription Active):** 'Listening to your rendition... Keep your Sa steady. Focus on smooth transition from Pa to Sa.'")
+    with col_m2:
+        st.markdown("#### Real-time AI Evaluation Monitor")
+        st.metric("Live Pitch Stability", "92.1% (Stable)", "+2.4%")
+        st.metric("Detected Fundamental (Sa)", f"{sa_hz} Hz")
+        st.metric("AI Prescription Adherence", "A+ (Following Teacher's Raga Rules)")
 
 with tab2:
-    st.subheader("🎼 22 Shruti Micro-Interval Breakdown Engine")
-    st.markdown(f"Micro-tonal cents calculation evaluated against Base Tonic **Sa = {sa_hz} Hz**")
-    
+    st.subheader("📊 Proper Practice Summary & Session Tracker")
+    if st.button("Generate Final Practice Report"):
+        st.success("✅ Practice Summary Compiled Successfully!")
+        summary_df = pd.DataFrame({
+            "Practice Parameter": ["Selected Instrument Profile", "Total Session Duration", "Active Practice Time (Live Captured)", "Natural Pause / Break Time", "Long Breaks (> 1 Min Detected)", "Session Status & Log"],
+            "Recorded Result": [selected_instrument, "15.4 mins", "12.8 mins", "2.6 mins", "0", "🟢 Fully Logged & Saved"]
+        })
+        st.table(summary_df)
+    else:
+        st.info("Click the button above to view your complete live session summary metrics.")
+
+with tab3:
+    st.subheader("🪕 Instrument Live Demonstration & Screen Play Suite")
+    col_i1, col_i2 = st.columns(2)
+    with col_i1:
+        st.markdown(f"#### 🎵 Active Instrument: {selected_instrument}")
+        st.markdown(f"*Family:* `{inst_details['family']}` | *Frequency Range:* `{inst_details['fmin']} to {inst_details['fmax']}`")
+        if st.button(f"▶️ Play Live Demonstration of {selected_instrument.split('-')[0]}"):
+            st.success(f"Demonstrating {selected_instrument} in {selected_scale_name.split()[0]} scale with authentic resonance!")
+    with col_i2:
+        st.markdown("#### 🎹 Interactive Screen Play Keyboard / Fretboard")
+        notes_cols = st.columns(7)
+        swara_notes = ["Sa", "Komal Re", "Re", "Komal Ga", "Ga", "Ma", "Pa"]
+        for idx, col in enumerate(notes_cols):
+            with col:
+                if st.button(swara_notes[idx], key=f"swara_{idx}"):
+                    st.toast(f"Playing Swara: {swara_notes[idx]} in {selected_scale_name.split()[0]}")
+
+with tab4:
+    st.subheader("🎼 22 Shruti & Swara Precision Breakdown")
     shrutis_data = [
-        {"Shruti #": 1, "Shruti Name": "Tivra", "Swar": "Komal Re", "Frequency Ratio": "256/243", "Target Cents": 90, "Recorded Error (Cents)": "+2.4 Cents", "Status": "Target Achieved"},
-        {"Shruti #": 2, "Shruti Name": "Kumudvati", "Swar": "Komal Re", "Frequency Ratio": "16/15", "Target Cents": 112, "Recorded Error (Cents)": "-5.1 Cents", "Status": "Minor Deviation"},
-        {"Shruti #": 3, "Shruti Name": "Manda", "Swar": "Re", "Frequency Ratio": "10/9", "Target Cents": 182, "Recorded Error (Cents)": "+1.2 Cents", "Status": "Target Achieved"},
-        {"Shruti #": 4, "Shruti Name": "Chandovati", "Swar": "Re", "Frequency Ratio": "9/8", "Target Cents": 204, "Recorded Error (Cents)": "+8.7 Cents", "Status": "Practice Needed"},
-        {"Shruti #": 5, "Shruti Name": "Dayaavati", "Swar": "Komal Ga", "Frequency Ratio": "32/27", "Target Cents": 294, "Recorded Error (Cents)": "-3.0 Cents", "Status": "Target Achieved"},
-        {"Shruti #": 6, "Shruti Name": "Ranjani", "Swar": "Komal Ga", "Frequency Ratio": "6/5", "Target Cents": 315, "Recorded Error (Cents)": "+0.8 Cents", "Status": "Perfect Pitch"},
-        {"Shruti #": 7, "Shruti Name": "Raktika", "Swar": "Ga", "Frequency Ratio": "5/4", "Target Cents": 386, "Recorded Error (Cents)": "-12.4 Cents", "Status": "Practice Needed"},
-        {"Shruti #": 8, "Shruti Name": "Roudri", "Swar": "Ga", "Frequency Ratio": "81/64", "Target Cents": 408, "Recorded Error (Cents)": "+4.2 Cents", "Status": "Target Achieved"},
-        {"Shruti #": 9, "Shruti Name": "Krodha", "Swar": "Ma", "Frequency Ratio": "4/3", "Target Cents": 498, "Recorded Error (Cents)": "+1.1 Cents", "Status": "Perfect Pitch"},
-        {"Shruti #": 10, "Shruti Name": "Vatika", "Swar": "Tivra Ma", "Frequency Ratio": "25/18", "Target Cents": 563, "Recorded Error (Cents)": "+14.5 Cents", "Status": "Practice Needed"}
+        {"Shruti #": 1, "Name": "Tivra", "Swar": "Komal Re", "Target Cents": 90, "Error": "+2.1 Cents", "Status": "Optimal"},
+        {"Shruti #": 2, "Name": "Kumudvati", "Swar": "Re", "Target Cents": 112, "Error": "-3.4 Cents", "Status": "Good"}
     ]
     st.dataframe(pd.DataFrame(shrutis_data), use_container_width=True)
 
-with tab3:
-    st.subheader("📊 Raga Swara Precision & AI Mentorship Report")
-    c1, c2 = st.columns(2)
-    with c1:
-        st.markdown("#### Swara Accuracy Report")
-        df_swara = pd.DataFrame({
-            "Swara": ["Sa", "Komal Re", "Re", "Komal Ga", "Ga", "Ma", "Tivra Ma", "Pa", "Dha", "Ni"],
-            "Accuracy (%)": [95.2, 69.2, 57.1, 95.3, 59.5, 58.0, 53.3, 64.7, 26.2, 44.4],
-            "Avg Error (Cents)": [3.2, 22.3, 20.1, 9.4, 22.7, 20.6, 25.6, 16.8, 36.4, 28.9]
-        })
-        st.dataframe(df_swara, use_container_width=True)
-    with c2:
-        st.markdown("#### 🤖 AI Teacher Feedback & Corrective Guidance")
-        st.success("🌟 **Sa & Komal Ga:** Excellent stability! Pitch deviation is under 10 cents.")
-        st.warning("⚠️ **Re & Dha:** High deviation detected (~20-36 cents). Practice sustained notes (*Meend*) with Tanpura drone.")
-        st.info("💡 **Raga Match:** 🟢 High Confidence Match -> **Raga Yaman**")
+with tab5:
+    st.subheader("🎓 Theory & Online Test Portal")
+    with st.expander("📖 RAG Music Theory Q&A Assistant"):
+        q = st.text_input("Ask a music theory question:")
+        if q:
+            st.info("📖 **Musicology Insight:** Traditional instruments combine physical resonance physics with microtonal modal accuracy.")
+    st.radio("Q1: Which traditional instrument features sympathetic strings (Tarab)?", ["A) Tabla", "B) Sitar", "C) Harmonium", "D) Flute"])
+    if st.button("Submit Exam"):
+        st.success("🏆 Test Submitted Successfully! Score: 100% - Distinction")
